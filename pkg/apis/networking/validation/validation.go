@@ -783,3 +783,30 @@ func ValidateServiceCIDRStatusUpdate(update, old *networking.ServiceCIDR) field.
 	allErrs := apivalidation.ValidateObjectMetaUpdate(&update.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
 	return allErrs
 }
+
+// ValidatePodNetworkName validates that the given name can be used as an
+// PodNetwork name.
+var ValidatePodNetworkName = apimachineryvalidation.NameIsDNSLabel
+
+// ValidatePodNetwork validates a PodNetwork.
+func ValidatePodNetwork(pn *networking.PodNetwork) field.ErrorList {
+	allErrs := apivalidation.ValidateObjectMeta(&pn.ObjectMeta, false, ValidatePodNetworkName, field.NewPath("metadata"))
+	return allErrs
+}
+
+// ValidatePodNetworkUpdate tests if an update to a PodNetwork is valid.
+func ValidatePodNetworkUpdate(update, old *networking.PodNetwork) field.ErrorList {
+	var allErrs field.ErrorList
+	allErrs = append(allErrs, apivalidation.ValidateObjectMetaUpdate(&update.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))...)
+	allErrs = append(allErrs, validatePodNetworkUpdateSpec(&update.Spec, &old.Spec, field.NewPath("spec"))...)
+	return allErrs
+}
+
+func validatePodNetworkUpdateSpec(update, old *networking.PodNetworkSpec, fldPath *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
+
+	allErrs = append(allErrs, apivalidation.ValidateImmutableField(update.ParametersRef, old.ParametersRef, fldPath.Child("parametersRef"))...)
+	allErrs = append(allErrs, apivalidation.ValidateImmutableField(update.Provider, old.Provider, fldPath.Child("provider"))...)
+
+	return allErrs
+}

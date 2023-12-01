@@ -20,4 +20,6 @@ package v1alpha1
 
 type IPAddressExpansion interface{}
 
+type PodNetworkExpansion interface{}
+
 type ServiceCIDRExpansion interface{}
